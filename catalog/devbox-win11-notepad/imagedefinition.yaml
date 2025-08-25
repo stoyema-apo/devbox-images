@@ -1,13 +1,13 @@
-image:
-  name: win11-notepad-plus
-  version: 0.1.0
-  description: Windows 11 with Notepad++ installed
-  publisher: Microsoft
-  originImage:
-    publisher: microsoftwindowsdesktop
-    offer: windows-11
-    sku: win11-24h2-pro
-    version: latest
+name: win11-notepad-plus
+image: win11-24h2-pro
+version: 0.1.0
+description: Windows 11 with Notepad++ installed
+publisher: Microsoft
+originImage:
+  publisher: microsoftwindowsdesktop
+  offer: windows-11
+  sku: win11-24h2-pro
+  version: latest
 
 customizations:
   - task: winget
