@@ -1,0 +1,112 @@
+schemaVersion: 1.0
+
+image:
+  publisher: "apo-it-ad"
+  offer: "devbox-win11-experimental"
+  sku: "24H2"
+
+phases:
+  - phase: install
+    tasks:
+      # ──────────────────────────────────────────────────────────────────────────
+      # 1) Basis-Tools installieren (WinGet-Tasks)
+      # ──────────────────────────────────────────────────────────────────────────
+      - task: WinGet
+        inputs:
+          id: Microsoft.VisualStudioCode
+          acceptSourceAgreements: true
+          acceptPackageAgreements: true
+
+      - task: WinGet
+        inputs:
+          id: Notepad++.Notepad++
+          acceptSourceAgreements: true
+          acceptPackageAgreements: true
+
+      - task: WinGet
+        inputs:
+          id: Microsoft.WSL
+          acceptSourceAgreements: true
+          acceptPackageAgreements: true
+
+      # ──────────────────────────────────────────────────────────────────────────
+      # 2) System-Features für WSL sicher aktivieren + Ubuntu installieren
+      #    (winget Microsoft.WSL erledigt vieles, wir stellen hier sicher,
+      #     dass Features gesetzt sind und setzen Ubuntu als Default-Distribution)
+      # ──────────────────────────────────────────────────────────────────────────
+      # WSL Features aktivieren + Ubuntu 24.04 installieren
+      - task: PowerShell
+        inputs:
+          inline: |
+            # Windows-Features für WSL aktivieren
+            dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+            dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+            # Ubuntu 24.04 installieren
+            try {
+              wsl --install -d Ubuntu-24.04
+              wsl --set-default Ubuntu-24.04
+            } catch {
+              Write-Error "Konnte Ubuntu 24.04 nicht installieren. Prüfe ob die Distribution verfügbar ist."
+            }      - task: PowerShell
+
+            # Ubuntu als Default setzen (wenn vorhanden)
+            try { wsl --set-default Ubuntu-24.04 } catch {
+              Write-Error "Konnte Ubuntu 24.04 nicht als Default setzen. Prüfe ob die Distribution verfügbar ist."
+            }
+
+      # ──────────────────────────────────────────────────────────────────────────
+      # 3) VS Code Extensions installieren
+      #    - inkl. Remote-WSL für die WSL-Entwicklung
+      #    - CLI-Pfad je nach Setup (User-Setup vs System-Setup)
+      # ──────────────────────────────────────────────────────────────────────────
+      - task: PowerShell
+        inputs:
+          inline: |
+            # Mögliche Pfade zur VS Code CLI (code.cmd)
+            $paths = @(
+              "$Env:LOCALAPPDATA\Programs\Microsoft VS Code\bin\code.cmd",  # User-Setup
+              "C:\Program Files\Microsoft VS Code\bin\code.cmd"             # System-Setup
+            )
+            $codePath = $paths | Where-Object { Test-Path $_ } | Select-Object -First 1
+            if (-not $codePath) {
+              Write-Error "VS Code CLI (code.cmd) wurde nicht gefunden."
+              exit 1
+            }
+
+            # Liste deiner gewünschten Extensions
+            $extensions = @(
+              "ms-vscode-remote.remote-wsl",   # Remote - WSL
+              "ms-python.python",              # Python
+              "ms-azuretools.vscode-docker"    # Docker
+              # ...
+            )
+
+            foreach ($ext in $extensions) {
+              try { & $codePath --install-extension $ext --force } catch {
+                Write-Warning "Konnte Extension '$ext' nicht installieren."
+              }
+            }
+
+      # ──────────────────────────────────────────────────────────────────────────
+      # 4) Optional: Anpassungen
+      # ──────────────────────────────────────────────────────────────────────────
+      - task: PowerShell
+        inputs:
+          inline: |
+            # Notepad++: Standard-Einstellungen-Verzeichnis vorbereiten (optional)
+            # (Hier könnt ihr z.B. eine zentrale config.xml hinkopieren, falls gewünscht)
+            # $nppConf = "$Env:ProgramFiles\Notepad++\config.model.xml"
+            # if (Test-Path $nppConf) { Copy-Item $nppConf "$Env:ProgramData\Notepad++\config.xml" -Force }
+
+            # Winget Quellen aktualisieren (sauberer Zustand fürs Image)
+            try { winget source update } catch { }
+
+  - phase: finalize
+    tasks:
+      # Sauberes Aufräumen vor dem Generalize (Sysprep macht der Builder für euch,
+      # hier nur Platz für letzte Anpassungen, Logs etc.)
+      - task: PowerShell
+        inputs:
+          inline: |
+            Write-Output "Finalize: Vorbereitung abgeschlossen."
