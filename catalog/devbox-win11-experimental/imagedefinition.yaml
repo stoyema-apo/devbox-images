@@ -1,3 +1,6 @@
+
+name: devbox-win11-experimental
+image: win11
 schemaVersion: 1.0
 
 phases:

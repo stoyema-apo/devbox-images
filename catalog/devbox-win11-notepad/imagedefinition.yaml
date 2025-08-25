@@ -1,0 +1,24 @@
+image:
+  name: win11-notepad-plus
+  version: 0.1.0
+  description: Windows 11 with Notepad++ installed
+  publisher: Microsoft
+  originImage:
+    publisher: microsoftwindowsdesktop
+    offer: windows-11
+    sku: win11-24h2-pro
+    version: latest
+
+customizations:
+  - task: winget
+    description: Install Notepad++
+    install:
+      - Notepad++.Notepad++
+    
+validations:
+  - task: powershell
+    description: Verify Notepad++ installation
+    inline: |
+      # Check Notepad++ installation
+      $nppPath = (Get-Command notepad++.exe -ErrorAction SilentlyContinue).Path
+      if (-not $nppPath) { throw "Notepad++ is not properly installed" }
