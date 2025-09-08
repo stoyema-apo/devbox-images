@@ -1,8 +1,0 @@
-$schema: 1.0
-name: win11-plain
-image: microsoftwindowsdesktop_windows-ent-cpc_win11-24h2-ent-cpc
-
-tasks:
-- name: winget
-  parameters:
-    package: Notepad++.Notepad++
