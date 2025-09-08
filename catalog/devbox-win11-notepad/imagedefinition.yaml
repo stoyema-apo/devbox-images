@@ -1,57 +1,59 @@
 $schema: 1.0
 name: devbox-win11-notepad
-image: microsoftwindowsdesktop_windows-ent-cpc_win11-24h2-ent-cpc
+image: MicrosoftWindowsDesktop_windows-ent-cpc_win11-24h2-ent-cpc
 
 tasks:
-- name: powershell
-  description: Install WSL and Ubuntu 24.04
-  inline: |
-    # Enable WSL feature
-    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-    
-    # Set WSL default version to 2
-    wsl --set-default-version 2
-    
-    # Install Ubuntu 24.04
-    wsl --install -d Ubuntu-24.04
-    
-    # Set Ubuntu 24.04 as default distribution
-    wsl --set-default Ubuntu-24.04
+  - name: powershell
+    parameters:
+      command: |
+        # Enable WSL feature
+        dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+        dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 
-- name: winget
-  parameters:
-    package: Notepad++.Notepad++
+        # Set WSL default version to 2
+        wsl --set-default-version 2
 
-- name: winget
-  parameters:
-    package: Microsoft.VisualStudioCode
+        # Install Ubuntu 24.04
+        wsl --install -d Ubuntu-24.04
 
-- name: powershell
-  description: Install VS Code WSL extension
-  inline: |
-    # Install VS Code WSL extension
-    code --install-extension ms-vscode-remote.remote-wsl
+        # Set Ubuntu 24.04 as default distribution
+        wsl --set-default Ubuntu-24.04
 
-- name: powershell
-  description: Verify installations
-  inline: |
-    # Check VSCode installation
-    $vscodePath = (Get-Command code -ErrorAction SilentlyContinue).Path
-    if (-not $vscodePath) { throw "Visual Studio Code is not properly installed" }
-    
-    # Check Notepad++ installation
-    $nppPath = (Get-Command notepad++.exe -ErrorAction SilentlyContinue).Path
-    if (-not $nppPath) { throw "Notepad++ is not properly installed" }
-    
-    # Check WSL installation
-    $wslStatus = wsl --status
-    if ($LASTEXITCODE -ne 0) { throw "WSL is not properly installed" }
-    
-    # Check Ubuntu 24.04 installation
-    $ubuntuCheck = wsl -l -v | Select-String "Ubuntu-24.04"
-    if (-not $ubuntuCheck) { throw "Ubuntu 24.04 is not properly installed in WSL" }
-    
-    # Check VS Code WSL extension
-    $wslExtension = code --list-extensions | Select-String "ms-vscode-remote.remote-wsl"
-    if (-not $wslExtension) { throw "VS Code WSL extension is not properly installed" }
+  - name: winget
+    parameters:
+      package: Notepad++.Notepad++
+
+  - name: winget
+    parameters:
+      package: Microsoft.VisualStudioCode
+
+  - name: powershell
+    parameters:
+      command: |
+        # Install VS Code WSL extension
+        code --install-extension ms-vscode-remote.remote-wsl
+
+  - name: powershell
+    parameters:
+      command: |
+        # Verify installations
+
+        # Check VSCode installation
+        $vscodePath = (Get-Command code -ErrorAction SilentlyContinue).Path
+        if (-not $vscodePath) { throw "Visual Studio Code is not properly installed" }
+
+        # Check Notepad++ installation
+        $nppPath = (Get-Command notepad++.exe -ErrorAction SilentlyContinue).Path
+        if (-not $nppPath) { throw "Notepad++ is not properly installed" }
+
+        # Check WSL installation
+        wsl --status | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "WSL is not properly installed" }
+
+        # Check Ubuntu 24.04 installation
+        $ubuntuCheck = wsl -l -v | Select-String "Ubuntu-24.04"
+        if (-not $ubuntuCheck) { throw "Ubuntu 24.04 is not properly installed in WSL" }
+
+        # Check VS Code WSL extension
+        $wslExtension = code --list-extensions | Select-String "ms-vscode-remote.remote-wsl"
+        if (-not $wslExtension) { throw "VS Code WSL extension is not properly installed" }
