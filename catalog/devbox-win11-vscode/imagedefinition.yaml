@@ -1,5 +1,5 @@
 $schema: 1.0
-name: devbox-win11-notepad
+name: devbox-win11-vscode
 image: MicrosoftWindowsDesktop_windows-ent-cpc_win11-24h2-ent-cpc
 
 tasks:
