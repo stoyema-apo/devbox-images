@@ -19,17 +19,13 @@ tasks:
         # Set Ubuntu 24.04 as default distribution
         wsl --set-default Ubuntu-24.04
 
-  - name: powershell
+  - name: winget
     parameters:
-      command: |
-        # Install VS Code via Winget
-        winget install Notepad++.Notepad++
+      package: Notepad++.Notepad++
 
-  - name: powershell
+  - name: winget
     parameters:
-      command: |
-        # Install VS Code via Winget
-        winget install Microsoft.VisualStudioCode
+      package: Microsoft.VisualStudioCode
 
   - name: powershell
     parameters:
