@@ -1,0 +1,25 @@
+$schema: "1.0"
+name: "devbox-win11-vscode-dsc"
+image: "MicrosoftWindowsDesktop_windows-ent-cpc_win11-24h2-ent-cpc"
+description: "Win11 DevBox with VS Code and WSL based on DSC configurations"
+
+### Tasks run in the SYSTEM context before the user logs in
+tasks:
+  ### Install VS Code, Notepad++ and Plugins via DSC
+  - name: winget
+    parameters:
+      downloadUrl: 'https://raw.githubusercontent.com/stoyema-apo/devbox-images/refs/heads/main/configurations/vscode/vscode-basic.dsc'
+  ### Install WSL and Ubuntu 24.04
+  - name: winget
+    parameters:
+      downloadUrl: 'https://raw.githubusercontent.com/stoyema-apo/devbox-images/refs/heads/main/configurations/wsl/wsl-ubuntu-24.04.dsc'
+  ### Perform desktop configurations
+  - name: winget
+    parameters:
+      downloadUrl: 'https://raw.githubusercontent.com/stoyema-apo/devbox-images/refs/heads/main/configurations/win11-desktop/desktop-settings.dsc'
+
+### Tasks run in the context of the logged-in user after login
+#userTasks:
+#  - name: winget
+#    parameters:
+#      configurationFile: 'z:\workspaces\eshop\.configurations\backend-eng.postcreate.dsc.yaml'
